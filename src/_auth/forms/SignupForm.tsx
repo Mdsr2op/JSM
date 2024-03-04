@@ -14,13 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { SignupValidation } from "../../lib/validation/index";
 import { Link } from "react-router-dom";
-import { createUserAccount } from "@/lib/appwrite/api";
+import { useCreateUserAccount } from "@/lib/react-query/queriesAndMutations";
 import { useToast } from "@/components/ui/use-toast"
 
 const SignupForm = () => {
-
+  const { mutateAsync: createUserAccount, isPending  } = useCreateUserAccount();
   const { toast } = useToast()
-  const isLoading = true;
 
   const reactHookForm = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -36,10 +35,10 @@ const SignupForm = () => {
     const newUser = await createUserAccount(values);
     
     if(!newUser){
-      toast({ title: "Sign up failed. Please try again.", });
+      return toast({ title: "Sign up failed. Please try again.", });
     }
-
-    return;
+    return toast({ title: "Sign up successful. Please sign in.",});
+    
   }
 
   return (
@@ -132,7 +131,7 @@ const SignupForm = () => {
             )}
           />
           <Button className="shad-button_primary" type="submit">
-            {isLoading ? <div>Loading...</div> : <div>Submit</div>}
+            {isPending ? <div>Loading...</div> : <div>Submit</div>}
           </Button>
           <p className="text-small-regular text-light-2 text-center -mt-2">
             Already have an account?
