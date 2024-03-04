@@ -13,13 +13,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SignupValidation } from "../../lib/validation/index";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, } from "react-router-dom";
 import { useCreateUserAccount } from "@/lib/react-query/queriesAndMutations";
 import { useToast } from "@/components/ui/use-toast"
+import { signInAccount } from "@/lib/appwrite/api";
 
 const SignupForm = () => {
   const { mutateAsync: createUserAccount, isPending  } = useCreateUserAccount();
   const { toast } = useToast()
+  const navigate = useNavigate();
 
   const reactHookForm = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -37,9 +39,20 @@ const SignupForm = () => {
     if(!newUser){
       return toast({ title: "Sign up failed. Please try again.", });
     }
-    return toast({ title: "Sign up successful. Please sign in.",});
+    toast({ title: "Sign up successful. Please sign in.",});
     
+    const signedInUser = await signInAccount({ username: values.username, password: values.password });
+  
+    if(!signedInUser){
+      toast({ title: "Sign in failed. Please try again.", });
+      navigate("/sign-in");
+      return;
+    }
+
+    toast({ title: "Sign in successful. Welcome.", });
+    navigate("/");
   }
+
 
   return (
     <Form {...reactHookForm}>
