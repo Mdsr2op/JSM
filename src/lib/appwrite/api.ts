@@ -66,7 +66,7 @@ export async function signInAccount(user: { username: string; password: string }
 
 export async function getAccount() {
   try {
-    const currentUser = account.get();
+    const currentUser = await account.get();
     return currentUser;
   } catch (error) {
     console.error(error)
@@ -83,6 +83,7 @@ export async function getUserAccount(){
       [Query.equal("accountId", account ? account.$id : "")]
     );
     
+
     if(!user){
       throw new Error("User not found");
     }
