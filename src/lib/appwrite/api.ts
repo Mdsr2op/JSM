@@ -1,6 +1,6 @@
 import { TNewUser } from "@/types";
 import { account, appwriteConfig, avatars, databases } from "./config";
-import { ID } from "appwrite";
+import { ID, Models, Query} from "appwrite";
 
 export async function createUserAccount(user: TNewUser) {
   try {
@@ -63,4 +63,42 @@ export async function signInAccount(user: { username: string; password: string }
     return null;
   }
 }
-  
+
+export async function getAccount() {
+  try {
+    const currentUser = account.get();
+    return currentUser;
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+export async function getUserAccount(){
+  try {
+    const account = await getAccount();
+    
+    const user = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      [Query.equal("accountId", account ? account.$id : "")]
+    );
+    
+    if(!user){
+      throw new Error("User not found");
+    }
+
+    return user.documents[0];
+  } catch (error) {
+    console.error(error)
+    return null;
+  }
+}
+
+export async function signOutAccount() {
+  try {
+    const session = await account.deleteSession("current");
+    return session;
+  } catch (error) {
+    console.error(error);
+  }
+}
