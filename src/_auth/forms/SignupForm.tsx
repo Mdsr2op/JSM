@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Button, Input } from "@/components/ui/index.ts";
 import {
   Form,
   FormControl,
@@ -11,16 +11,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { SignupValidation } from "../../lib/validation/index";
-import { Link, useNavigate, } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCreateUserAccount } from "@/lib/react-query/queriesAndMutations";
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast";
 import { signInAccount } from "@/lib/appwrite/api";
+import { useAuth } from "@/context/AuthContext";
+import Loader from "@/components/shared/Loader";
 
 const SignupForm = () => {
-  const { mutateAsync: createUserAccount, isPending  } = useCreateUserAccount();
-  const { toast } = useToast()
+  const { checkAuth, isAuthenticating } = useAuth();
+  const { mutateAsync: createUserAccount, isPending } = useCreateUserAccount();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const reactHookForm = useForm<z.infer<typeof SignupValidation>>({
@@ -35,24 +37,32 @@ const SignupForm = () => {
 
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
     const newUser = await createUserAccount(values);
-    
-    if(!newUser){
-      return toast({ title: "Sign up failed. Please try again.", });
+
+    if (!newUser) {
+      return toast({ title: "Sign up failed. Please try again." });
     }
-    toast({ title: "Sign up successful. Please sign in.",});
-    
-    const signedInUser = await signInAccount({ username: values.username, password: values.password });
-  
-    if(!signedInUser){
-      toast({ title: "Sign in failed. Please try again.", });
+    toast({ title: "Sign up successful." });
+
+    const signedInUser = await signInAccount({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (!signedInUser) {
+      toast({ title: "Sign in failed. Please try again." });
       navigate("/sign-in");
       return;
     }
 
-    toast({ title: "Sign in successful. Welcome.", });
-    navigate("/");
-  }
+    const isLoggedIn = await checkAuth();
 
+    if (isLoggedIn) {
+      reactHookForm.reset();
+      navigate("/");
+    } else {
+      toast({ title: "Sign in failed. Please try again" });
+    }
+  }
 
   return (
     <Form {...reactHookForm}>
@@ -77,7 +87,7 @@ const SignupForm = () => {
                   <Input
                     type="text"
                     className="shad-input"
-                    placeholder="shadcn"
+                    placeholder="eg. John Doe"
                     autoComplete="off"
                     {...field}
                   />
@@ -96,7 +106,7 @@ const SignupForm = () => {
                   <Input
                     type="text"
                     className="shad-input"
-                    placeholder="shadcn"
+                    placeholder="eg. johndoe"
                     autoComplete="off"
                     {...field}
                   />
@@ -115,7 +125,7 @@ const SignupForm = () => {
                   <Input
                     type="email"
                     className="shad-input"
-                    placeholder="shadcn"
+                    placeholder="eg. johndoe123@example.com"
                     autoComplete="off"
                     {...field}
                   />
@@ -134,7 +144,7 @@ const SignupForm = () => {
                   <Input
                     type="password"
                     className="shad-input"
-                    placeholder="shadcn"
+                    placeholder="Enter your password"
                     autoComplete="off"
                     {...field}
                   />
@@ -144,7 +154,7 @@ const SignupForm = () => {
             )}
           />
           <Button className="shad-button_primary" type="submit">
-            {isPending ? <div>Loading...</div> : <div>Submit</div>}
+            {isPending ? <div className="flex gap-3 items-center"><Loader/> Loading...</div> : <div>Submit</div>}
           </Button>
           <p className="text-small-regular text-light-2 text-center -mt-2">
             Already have an account?

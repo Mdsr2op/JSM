@@ -1,5 +1,4 @@
 
-
 export type TNewUser = {
     fullname: string,
     username: string,
@@ -24,4 +23,19 @@ export type TAuthContext = {
     setUser: React.Dispatch<React.SetStateAction<TUser>>
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
     checkAuth: () => Promise<boolean>
+}
+
+export type TNavLink = {
+    imgURL: string,
+    route: string,
+    label: string,
+}
+
+export type TNewPost = {
+    userId: string,
+    caption: string,
+    file: File[],
+    location?: string,
+    tags?: string
+
 }

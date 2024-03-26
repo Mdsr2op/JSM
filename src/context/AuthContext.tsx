@@ -63,7 +63,7 @@ export const AuthProvider = ({children}: {children:React.ReactNode}) => {
             cookieFallback === null ||
             cookieFallback === "[]" 
         ){
-            navigate("/sign-in")
+            navigate("/sign-up")
         }
 
         checkAuth();
