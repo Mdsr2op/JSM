@@ -72,7 +72,7 @@ export async function getAccount() {
   }
 }
 
-export async function getUserAccount() {
+export async function getUser() {
   try {
     const account = await getAccount();
 
@@ -222,15 +222,15 @@ export async function likePost(postId: string, likesArray: string[]) {
   }
 }
 
-export async function savePost(userId: string, postId: string) {
+export async function savePost(postId: string, userId: string) {
   try {
     const newSave = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.savesCollectionId,
       ID.unique(),
       {
-        user: userId,
         posts: postId,
+        user: userId,
       }
     );
 
